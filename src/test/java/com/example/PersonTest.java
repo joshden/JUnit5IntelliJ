@@ -17,7 +17,9 @@ class PersonTest {
 
     @Test
     void testGetAge() {
-        Person person = new Person("Joey", "Doe", LocalDate.parse("2013-01-12"));
+        LocalDate dateOfBirth = LocalDate.parse("2013-01-02");
+        LocalDate currentDate = LocalDate.parse("2017-01-17");
+        Person person = new Person("Joey", "Doe", dateOfBirth, ()->currentDate);
         long age = person.getAge();
         assertEquals(4, age);
     }

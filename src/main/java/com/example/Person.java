@@ -2,16 +2,24 @@ package com.example;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.function.Supplier;
 
 class Person {
     private final String givenName;
     private final String surname;
     private final LocalDate dateOfBirth;
+    private final Supplier<LocalDate> currentDateSupplier;
 
     Person(String givenName, String surname, LocalDate dateOfBirth) {
+        this(givenName, surname, dateOfBirth, LocalDate::now);
+    }
+
+    // Visible for testing
+    Person(String givenName, String surname, LocalDate dateOfBirth, Supplier<LocalDate> currentDateSupplier) {
         this.givenName = givenName;
         this.surname = surname;
         this.dateOfBirth = dateOfBirth;
+        this.currentDateSupplier = currentDateSupplier;
     }
 
     String getDisplayName() {
@@ -19,7 +27,7 @@ class Person {
     }
 
     long getAge() {
-        return ChronoUnit.YEARS.between(dateOfBirth, LocalDate.now());
+        return ChronoUnit.YEARS.between(dateOfBirth, currentDateSupplier.get());
     }
 
     public static void main(String... args) {
