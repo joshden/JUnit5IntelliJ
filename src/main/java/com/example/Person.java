@@ -30,6 +30,9 @@ class Person {
         return ChronoUnit.YEARS.between(dateOfBirth, currentDateSupplier.get());
     }
 
+    void publishAge() {
+    }
+
     public static void main(String... args) {
         Person person = new Person("Joey", "Doe", LocalDate.parse("2013-01-12"));
         System.out.println(person.getDisplayName() + ": " + person.getAge() + " years");
