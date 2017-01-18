@@ -1,5 +1,6 @@
 package com.example;
 
+import com.example.birthdays.BirthdaysClient;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.function.Supplier;
@@ -11,11 +12,11 @@ class Person {
     private final Supplier<LocalDate> currentDateSupplier;
 
     Person(String givenName, String surname, LocalDate dateOfBirth) {
-        this(givenName, surname, dateOfBirth, LocalDate::now);
+        this(givenName, surname, dateOfBirth, LocalDate::now, null);
     }
 
     // Visible for testing
-    Person(String givenName, String surname, LocalDate dateOfBirth, Supplier<LocalDate> currentDateSupplier) {
+    Person(String givenName, String surname, LocalDate dateOfBirth, Supplier<LocalDate> currentDateSupplier, BirthdaysClient birthdaysClient) {
         this.givenName = givenName;
         this.surname = surname;
         this.dateOfBirth = dateOfBirth;
