@@ -5,6 +5,9 @@ import com.example.birthdays.BirthdaysClient;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Supplier;
 
 class Person {
@@ -43,6 +46,36 @@ class Person {
         }
         catch (IOException e) {
             throw new PersonException("Failed to publish " + nameToPublish + " age " + age, e);
+        }
+    }
+
+    public Set<String> getThoseInCommon() throws PersonException {
+        Set<String> thoseInCommon = new HashSet<>();
+        thoseInCommon.addAll(getThoseInCommonBornOn());
+        thoseInCommon.addAll(getThoseInCommonOfAge());
+        return thoseInCommon;
+    }
+
+    private Collection<String> getThoseInCommonBornOn() throws PersonException {
+        int month = dateOfBirth.getMonth().getValue();
+        int dayOfMonth = dateOfBirth.getDayOfMonth();
+
+        try {
+            return birthdaysClient.findFamousNamesBornOn(month, dayOfMonth);
+        }
+        catch (IOException e) {
+            throw new PersonException("Error finding famous people born on month " + month + " day " + dayOfMonth, e);
+        }
+    }
+
+    private Collection<String> getThoseInCommonOfAge() throws PersonException {
+        long age = getAge();
+
+        try {
+            return birthdaysClient.findFamousNamesOfAge(age);
+        }
+        catch (IOException e) {
+            throw new PersonException("Error finding famous people of age " + age, e);
         }
     }
 
