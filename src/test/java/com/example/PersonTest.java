@@ -13,13 +13,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class PersonTest {
-    private BirthdaysClient birthdaysClient = mock(BirthdaysClient.class);
+    private final BirthdaysClient birthdaysClient = mock(BirthdaysClient.class);
+    private final IOException ioException = new IOException();
 
     @Test
     void testGetDisplayName() {
-        Person person = new Person("Josh", "Hayden", null, null, birthdaysClient);
+        Person person = createJoeSixteenJan2();
         String displayName = person.getDisplayName();
-        assertEquals("Hayden, Josh", displayName);
+        assertEquals("Sixteen, Joe", displayName);
     }
 
     @Test
@@ -33,9 +34,7 @@ class PersonTest {
 
     @Test
     void testPublishAge() throws IOException, PersonException {
-        LocalDate dateOfBirth = LocalDate.parse("2000-01-02");
-        LocalDate currentDate = LocalDate.parse("2017-01-01");
-        Person person = new Person("Joe", "Sixteen", dateOfBirth, ()->currentDate, birthdaysClient);
+        Person person = createJoeSixteenJan2();
         verifyZeroInteractions(birthdaysClient);
         person.publishAge();
         verify(birthdaysClient).publishRegularPersonAge("Joe Sixteen", 16);
@@ -43,12 +42,8 @@ class PersonTest {
 
     @Test
     void testPublishAge_IOException() throws IOException {
-        LocalDate dateOfBirth = LocalDate.parse("2000-01-02");
-        LocalDate currentDate = LocalDate.parse("2017-01-01");
+        Person person = createJoeSixteenJan2();
 
-        Person person = new Person("Joe", "Sixteen", dateOfBirth, ()->currentDate, birthdaysClient);
-
-        IOException ioException = new IOException();
         doThrow(ioException).when(birthdaysClient).publishRegularPersonAge("Joe Sixteen", 16);
 
         try {
@@ -56,16 +51,13 @@ class PersonTest {
             fail("expected exception not thrown");
         }
         catch (PersonException e) {
-            assertSame(ioException, e.getCause());
-            assertEquals("Failed to publish Joe Sixteen age 16", e.getMessage());
+            assertCauseAndMessage("Failed to publish Joe Sixteen age 16", e);
         }
     }
 
     @Test
     void testGetThoseInCommon() throws IOException, PersonException {
-        LocalDate dateOfBirth = LocalDate.parse("2000-01-02");
-        LocalDate currentDate = LocalDate.parse("2017-01-01");
-        Person person = new Person("Joe", "Sixteen", dateOfBirth, ()->currentDate, birthdaysClient);
+        Person person = createJoeSixteenJan2();
 
         when(birthdaysClient.findFamousNamesOfAge(16)).thenReturn(Arrays.asList("JoeFamous Sixteen", "Another Person"));
         when(birthdaysClient.findFamousNamesBornOn(1, 2)).thenReturn(Arrays.asList("Jan TwoKnown"));
@@ -80,18 +72,11 @@ class PersonTest {
         );
     }
 
-    private <T> Executable setContains(Set<T> set, T expected) {
-        return () -> assertTrue(set.contains(expected), "Should contain " + expected);
-    }
-
     @Test
     void testGetThoseInCommon_BornOn_IOException() throws IOException {
-        LocalDate dateOfBirth = LocalDate.parse("2000-01-02");
-        LocalDate currentDate = LocalDate.parse("2017-01-01");
-        Person person = new Person("Joe", "Sixteen", dateOfBirth, ()->currentDate, birthdaysClient);
+        Person person = createJoeSixteenJan2();
 
         when(birthdaysClient.findFamousNamesOfAge(16)).thenReturn(Arrays.asList("JoeFamous Sixteen", "Another Person"));
-        IOException ioException = new IOException();
         when(birthdaysClient.findFamousNamesBornOn(1, 2)).thenThrow(ioException);
 
         try {
@@ -99,18 +84,14 @@ class PersonTest {
             fail("expected exception not thrown");
         }
         catch (PersonException e) {
-            assertSame(ioException, e.getCause());
-            assertEquals("Error finding famous people born on month 1 day 2", e.getMessage());
+            assertCauseAndMessage("Error finding famous people born on month 1 day 2", e);
         }
     }
 
     @Test
     void testGetThoseInCommon_OfAge_IOException() throws IOException {
-        LocalDate dateOfBirth = LocalDate.parse("2000-01-02");
-        LocalDate currentDate = LocalDate.parse("2017-01-01");
-        Person person = new Person("Joe", "Sixteen", dateOfBirth, ()->currentDate, birthdaysClient);
+        Person person = createJoeSixteenJan2();
 
-        IOException ioException = new IOException();
         when(birthdaysClient.findFamousNamesOfAge(16)).thenThrow(ioException);
         when(birthdaysClient.findFamousNamesBornOn(1, 2)).thenReturn(Arrays.asList("Jan TwoKnown"));
 
@@ -119,10 +100,23 @@ class PersonTest {
             fail("expected exception not thrown");
         }
         catch (PersonException e) {
-            assertSame(ioException, e.getCause());
-            assertEquals("Error finding famous people of age 16", e.getMessage());
+            assertCauseAndMessage("Error finding famous people of age 16", e);
         }
     }
 
+    private Person createJoeSixteenJan2() {
+        LocalDate dateOfBirth = LocalDate.parse("2000-01-02");
+        LocalDate currentDate = LocalDate.parse("2017-01-01");
+        return new Person("Joe", "Sixteen", dateOfBirth, ()->currentDate, birthdaysClient);
+    }
+
+    private <T> Executable setContains(Set<T> set, T expected) {
+        return () -> assertTrue(set.contains(expected), "Should contain " + expected);
+    }
+
+    private void assertCauseAndMessage(String expectedMessage, PersonException e) {
+        assertSame(ioException, e.getCause());
+        assertEquals(expectedMessage, e.getMessage());
+    }
 
 }
