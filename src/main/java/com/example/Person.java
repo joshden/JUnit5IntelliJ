@@ -35,15 +35,14 @@ class Person {
         return ChronoUnit.YEARS.between(dateOfBirth, currentDateSupplier.get());
     }
 
-    void publishAge() {
+    void publishAge() throws PersonException {
         String nameToPublish = givenName + " " + surname;
         long age = getAge();
         try {
             birthdaysClient.publishRegularPersonAge(nameToPublish, age);
         }
         catch (IOException e) {
-            // TODO handle this!
-            e.printStackTrace();
+            throw new PersonException("Failed to publish " + nameToPublish + " age " + age, e);
         }
     }
 
