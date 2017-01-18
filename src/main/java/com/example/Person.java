@@ -1,6 +1,8 @@
 package com.example;
 
 import com.example.birthdays.BirthdaysClient;
+
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.function.Supplier;
@@ -10,9 +12,10 @@ class Person {
     private final String surname;
     private final LocalDate dateOfBirth;
     private final Supplier<LocalDate> currentDateSupplier;
+    private final BirthdaysClient birthdaysClient;
 
     Person(String givenName, String surname, LocalDate dateOfBirth) {
-        this(givenName, surname, dateOfBirth, LocalDate::now, null);
+        this(givenName, surname, dateOfBirth, LocalDate::now, new BirthdaysClient());
     }
 
     // Visible for testing
@@ -21,6 +24,7 @@ class Person {
         this.surname = surname;
         this.dateOfBirth = dateOfBirth;
         this.currentDateSupplier = currentDateSupplier;
+        this.birthdaysClient = birthdaysClient;
     }
 
     String getDisplayName() {
@@ -32,6 +36,15 @@ class Person {
     }
 
     void publishAge() {
+        String nameToPublish = givenName + " " + surname;
+        long age = getAge();
+        try {
+            birthdaysClient.publishRegularPersonAge(nameToPublish, age);
+        }
+        catch (IOException e) {
+            // TODO handle this!
+            e.printStackTrace();
+        }
     }
 
     public static void main(String... args) {
