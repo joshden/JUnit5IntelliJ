@@ -3,10 +3,13 @@ package com.example;
 import com.example.birthdays.BirthdaysClient;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 class PersonTest {
     private BirthdaysClient birthdaysClient = mock(BirthdaysClient.class);
@@ -28,11 +31,14 @@ class PersonTest {
     }
 
     @Test
-    void testPublishAge() {
+    void testPublishAge() throws IOException {
         LocalDate dateOfBirth = LocalDate.parse("2000-01-02");
         LocalDate currentDate = LocalDate.parse("2017-01-01");
         Person person = new Person("Joe", "Sixteen", dateOfBirth, ()->currentDate, birthdaysClient);
+        verifyZeroInteractions(birthdaysClient);
         person.publishAge();
+        verify(birthdaysClient).publishRegularPersonAge("Joe Sixteen", 16);
     }
+
 
 }
